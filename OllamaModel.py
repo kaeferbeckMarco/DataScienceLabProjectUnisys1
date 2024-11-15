@@ -6,7 +6,6 @@ from Model import Model
 class OllamaModel(Model):
     def extract_rules_from_text(self,text,prompt1,prompt2):
         # Step 1: Segment and preprocess the text
-        #segments = ollama.segment_text(text)
         segmentsResponse = ollama.chat(
             model="llama3.2",
             messages=[
@@ -24,7 +23,6 @@ class OllamaModel(Model):
         for segment in segments:
             # Step 2: Extract rules using contextual understanding
             prompt = f"{prompt2}: {segment}"
-            #response = ollama.generate(prompt)
             response = ollama.chat(
                 model="llama3.2",
                 messages=[
@@ -35,11 +33,22 @@ class OllamaModel(Model):
                 ],
             )
 
-            # Step 3: Parse the response to get conditions and consequences
-            #parsed_rules = parse_response(response)
             extracted_rules.append(response["message"]["content"])
 
         return extracted_rules
 
-    def method2(self, param):
+    def translate_document_to_english(self, text):
+        response = ollama.chat(
+            model="llama3.2",
+            messages=[
+                {
+                    "role": "user",
+                    "content": f"Translate the following text to English: {text}"
+                },
+            ],
+        )
+        return response["message"]["content"]
+
+
+def method2(self, param):
         return "OllamaModel: method2"

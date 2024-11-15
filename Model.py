@@ -6,5 +6,9 @@ class Model(ABC):
         pass
 
     @abstractmethod
+    def translate_document_to_english(self, text):
+        pass
+
+    @abstractmethod
     def method2(self, param):
         pass
