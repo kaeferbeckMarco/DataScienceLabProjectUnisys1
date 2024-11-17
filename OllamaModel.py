@@ -4,9 +4,9 @@ from Model import Model
 
 
 class OllamaModel(Model):
-    def extract_rules_from_text(self,text,prompt1,prompt2):
-        # Step 1: Segment and preprocess the text
-        segmentsResponse = ollama.chat(
+
+    def segment_text(self, text, prompt1):
+        segments = ollama.chat(
             model="llama3.2",
             messages=[
                 {
@@ -16,26 +16,21 @@ class OllamaModel(Model):
             ],
         )
 
-        segments = segmentsResponse["message"]["content"].split("#")
+        return segments["message"]["content"].split("#")
 
-        extracted_rules = []
+    def extract_rules_from_text(self, segment, prompt):
+        prompt = f"{prompt}: {segment}"
+        response = ollama.chat(
+            model="llama3.2",
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                },
+            ],
+        )
 
-        for segment in segments:
-            # Step 2: Extract rules using contextual understanding
-            prompt = f"{prompt2}: {segment}"
-            response = ollama.chat(
-                model="llama3.2",
-                messages=[
-                    {
-                        "role": "user",
-                        "content": prompt
-                    },
-                ],
-            )
-
-            extracted_rules.append(response["message"]["content"])
-
-        return extracted_rules
+        return response["message"]["content"]
 
     def translate_document_to_english(self, text):
         response = ollama.chat(
@@ -51,4 +46,4 @@ class OllamaModel(Model):
 
 
 def method2(self, param):
-        return "OllamaModel: method2"
+    return "OllamaModel: method2"
