@@ -36,5 +36,3 @@ class BusinessRuleExtractionLibrary:
         else:
             raise ValueError("Unsupported LLM model")
 
-    def get_business_rules(self):
-        return self
