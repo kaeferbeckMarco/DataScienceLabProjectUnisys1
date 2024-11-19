@@ -9,8 +9,8 @@ class BusinessRuleExtractionLibrary:
     def __init__(self, llm: LLM):
         self.business_rules = []
         self.llm = llm
-        self.prompt1 = "segment the text into logical segments use # to separate the segments"
-        self.prompt2 = "Identify legal rules in the following segment"
+        self.prompt1 = "Please divide the provided text into meaningful sections based on content and context. Use the '#' symbol to separate each section. Focus on identifying distinct topics, legal clauses, or thematic shifts to ensure each segment is coherent and self-contained"
+        self.prompt2 = "From the following text segment, extract all explicit and implicit legal or business rules. Present each rule clearly and concisely, ensuring it is self-contained. If applicable, format the rules as a numbered list and include any conditions or exceptions associated with each rule"
 
     def extract_business_rules_from_document(self, text):
         # get the correct LLM model based on the LLM enum
