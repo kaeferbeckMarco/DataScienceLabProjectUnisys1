@@ -18,8 +18,8 @@ class OllamaModel(Model):
 
         return segments["message"]["content"].split("#")
 
-    def extract_rules_from_text(self, segment, prompt):
-        prompt = f"{prompt}: {segment}"
+    def extract_rules_from_text(self, segment, prompt2):
+        prompt = f"{prompt2}: {segment}"
         response = ollama.chat(
             model="llama3.2",
             messages=[
@@ -45,5 +45,8 @@ class OllamaModel(Model):
         return response["message"]["content"]
 
 
-def method2(self, param):
-    return "OllamaModel: method2"
+    def method2(self, param):
+        # Correctly implemented abstract method from the Model class
+        return f"OllamaModel: method2 with param {param}"
+
+
