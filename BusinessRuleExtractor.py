@@ -1,6 +1,7 @@
 import ollama
 
 from LLM import LLM
+from MistralModel import MistralModel
 from OllamaModel import OllamaModel
 
 
@@ -300,6 +301,8 @@ transmit(_EncryptedData). % Stub: assume transmit always succeeds\n\
     def get_model(self):
         if self.llm == LLM.OLLAMA:
             return OllamaModel()
+        if self.llm == LLM.MISTRAL:
+            return MistralModel()
         # Add other models as needed
         else:
             raise ValueError("Unsupported LLM model")
