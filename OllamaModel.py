@@ -5,11 +5,10 @@ from Model import Model
 
 class OllamaModel(Model):
 
-    def segment_text(self, text, prompt1,system_prompt):
+    def segment_text(self, text, prompt1):
         segments = ollama.chat(
             model="llama3.2",
             messages=[
-                {"role": "system", "content": system_prompt},
                 {
                     "role": "user",
                     "content": f"{prompt1}: {text}"
@@ -19,12 +18,11 @@ class OllamaModel(Model):
 
         return segments["message"]["content"].split("#")
 
-    def extract_rules_from_text(self, segment, prompt2,system_prompt):
+    def extract_rules_from_text(self, segment, prompt2):
         prompt = f"{prompt2}: {segment}"
         response = ollama.chat(
             model="llama3.2",
             messages=[
-                {"role": "system", "content": system_prompt},
                 {
                     "role": "user",
                     "content": prompt

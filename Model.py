@@ -3,11 +3,11 @@ from abc import ABC, abstractmethod
 class Model(ABC):
 
     @abstractmethod
-    def segment_text(self,text,prompt,systemPrompt):
+    def segment_text(self,text,prompt):
         pass
 
     @abstractmethod
-    def extract_rules_from_text(self,text,prompt,systemPrompt):
+    def extract_rules_from_text(self,text,prompt):
         pass
 
     @abstractmethod
