@@ -1,0 +1,256 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Facts and Predicates (placeholders for actual system data)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Example entities:
+% customer(CustomerID)
+% employee(EmployeeID)
+% vendor(VendorID)
+% transaction(TransactionID, Amount)
+% loan_applicant(ApplicantID)
+% expense_report(ReportID, SubmitterEmployeeID)
+% purchase(CustomerID, PurchaseID, PurchaseDate)
+% refund_request(CustomerID, PurchaseID, RequestDate)
+% discount(DiscountPercent)
+% terms_agreement(CustomerID)
+% vetted(VendorID)
+% approved_by_procurement(VendorID)
+% credit_score(ApplicantID, Score)
+% valid_id(CustomerID)
+% days_between(Date1, Date2, Days)
+% end_of_month(Date)
+
+% Additional utility predicates for encryption, etc., would also be defined.
+% encrypt(Data, EncryptedData)
+% store(EncryptedData)
+% transmit(EncryptedData)
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Rules Implementing the Policies
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% 1. Customers must provide valid identification before opening an account.
+%    A customer can open an account only if they have a valid ID.
+can_open_account(CustomerID) :-
+    customer(CustomerID),
+    valid_id(CustomerID).
+
+% 2. All transactions above $10,000 must be reported to the compliance department.
+%    For a given transaction, check amount and determine if it needs reporting.
+report_to_compliance(TransactionID) :-
+    transaction(TransactionID, Amount),
+    Amount > 10000.
+
+% 3. Loan applications can only be processed if the applicant’s credit score >= 650.
+can_process_loan(ApplicantID) :-
+    loan_applicant(ApplicantID),
+    credit_score(ApplicantID, Score),
+    Score >= 650.
+
+% 4. Employees are not allowed to approve their own expense reports.
+%    An employee can approve an expense report only if they are not the submitter.
+can_approve_expense(EmployeeID, ReportID) :-
+    expense_report(ReportID, Submitter),
+    EmployeeID \= Submitter.
+
+% 5. Refunds are only issued if the request is made within 30 days of the purchase date.
+eligible_for_refund(CustomerID, PurchaseID) :-
+    purchase(CustomerID, PurchaseID, PurchaseDate),
+    refund_request(CustomerID, PurchaseID, RequestDate),
+    days_between(PurchaseDate, RequestDate, Days),
+    Days =< 30.
+
+% 6. A manager must approve any discount greater than 20%.
+%    If a discount is > 20, we require manager_approval(…).
+needs_manager_approval(Discount) :-
+    Discount > 20.
+
+% 7. Customers must agree to the terms and conditions before using the service.
+can_use_service(CustomerID) :-
+    customer(CustomerID),
+    terms_agreement(CustomerID).
+
+% 8. All customer data must be encrypted when stored or transmitted.
+%    These rules illustrate that data operations require encryption.
+store_customer_data(CustomerID, Data) :-
+    customer(CustomerID),
+    encrypt(Data, EncryptedData),
+    store(EncryptedData).
+
+transmit_customer_data(CustomerID, Data) :-
+    customer(CustomerID),
+    encrypt(Data, EncryptedData),
+    transmit(EncryptedData).
+
+% 9. Vendors must be vetted and approved by the procurement team before signing contracts.
+can_sign_contract(VendorID) :-
+    vendor(VendorID),
+    vetted(VendorID),
+    approved_by_procurement(VendorID).
+
+% 10. Inventory checks must be conducted at the end of each month.
+%     This rule ensures inventory_check is performed only on end-of-month dates.
+conduct_inventory_check(Date) :-
+    end_of_month(Date).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The above provides a logical framework. Data (facts) about customers,
+% transactions, etc., would be added separately. For example:
+%
+% customer(cust123).
+% valid_id(cust123).
+% terms_agreement(cust123).
+%
+% transaction(tx456, 15000).
+%
+% credit_score(applicant789, 700).
+%
+% ... and so forth.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Example Facts Representing System Data
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Customers and their valid IDs
+customer(cust001).
+customer(cust002).
+valid_id(cust001).       % cust001 provided a valid ID
+% cust002 does not have valid_id fact, so they do not meet that requirement
+
+% Terms agreements
+terms_agreement(cust001). % cust001 agreed to terms
+
+% Transactions
+transaction(tx001, 5000).
+transaction(tx002, 20000).
+
+% Employees
+employee(emp100).
+employee(emp200).
+
+% Expense reports
+expense_report(rpt001, emp100).  % This report was submitted by emp100
+expense_report(rpt002, emp200).
+
+% Loan applicants and credit scores
+loan_applicant(appA).
+loan_applicant(appB).
+credit_score(appA, 700).
+credit_score(appB, 600).
+
+% Purchases and Refund Requests
+% Assume dates are encoded as date(Year, Month, Day)
+purchase(cust001, pur001, date(2024,11,1)).
+purchase(cust002, pur002, date(2024,10,1)).
+
+refund_request(cust001, pur001, date(2024,11,15)).  % 14 days after purchase
+refund_request(cust002, pur002, date(2024,12,5)).   % More than 30 days later (approx. 65 days)
+
+% Utility predicate for calculating days between dates (stub/example)
+% In a real system, you'd implement date arithmetic or call a library.
+days_between(date(Y1,M1,D1), date(Y2,M2,D2), Days) :-
+    % This is a simplified placeholder that does not do proper calendar math.
+    % Let's just assume all months have 30 days for demonstration.
+    TotalDays1 is (Y1 * 360) + (M1 * 30) + D1,
+    TotalDays2 is (Y2 * 360) + (M2 * 30) + D2,
+    Days is TotalDays2 - TotalDays1.
+
+% Discounts
+% Example: if a discount is 25, manager approval is needed.
+% (No facts needed if we just query the rule with a specific discount number.)
+
+% Vendors
+vendor(vendX).
+vendor(vendY).
+vetted(vendX).
+approved_by_procurement(vendX).
+% vendY is not vetted or approved.
+
+% Inventory checks at end of month
+% Assume we mark a date as end_of_month when it’s the last day of the month:
+end_of_month(date(2024,11,30)).
+end_of_month(date(2024,12,31)).
+
+% Encryption storage and transmit (stubs)
+encrypt(Data, EncryptedData) :- atom_concat('enc_', Data, EncryptedData).
+store(_EncryptedData).  % Stub: assume store always succeeds
+transmit(_EncryptedData). % Stub: assume transmit always succeeds
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Example Queries and Their Expected Results
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% 1. Can cust001 open an account?
+% Query:
+% ?- can_open_account(cust001).
+% Expected: true (because valid_id(cust001) is given)
+
+% 2. Which transactions must be reported to compliance?
+% Query:
+% ?- report_to_compliance(TxID).
+% Expected: TxID = tx002 (since tx002 amount is 20000 > 10000)
+
+% 3. Which loan applicants can be processed?
+% Query:
+% ?- can_process_loan(Applicant).
+% Expected: Applicant = appA (since appA has credit score 700 >= 650, appB has only 600)
+
+% 4. Can emp100 approve rpt001?
+% Query:
+% ?- can_approve_expense(emp100, rpt001).
+% Expected: false (because emp100 is the submitter of rpt001, so they can’t approve it)
+%
+% Can emp100 approve rpt002?
+% ?- can_approve_expense(emp100, rpt002).
+% Expected: true (because emp100 != emp200, so no conflict)
+
+% 5. Is cust001 eligible for a refund for purchase pur001?
+% Query:
+% ?- eligible_for_refund(cust001, pur001).
+% Expected: true (refund requested within 30 days)
+%
+% Is cust002 eligible for a refund for purchase pur002?
+% ?- eligible_for_refund(cust002, pur002).
+% Expected: false (request is made too late)
+
+% 6. Does a 25% discount need manager approval?
+% Query:
+% ?- needs_manager_approval(25).
+% Expected: true (25 > 20)
+
+% 7. Can cust001 use the service?
+% Query:
+% ?- can_use_service(cust001).
+% Expected: true (cust001 agreed to terms)
+
+% Can cust002 use the service?
+% ?- can_use_service(cust002).
+% Expected: false (no terms_agreement for cust002)
+
+% 8. Storing and transmitting customer data (just an example)
+% Query:
+% ?- store_customer_data(cust001, 'sensitive_info').
+% Expected: true (data gets encrypted and stored)
+%
+% ?- transmit_customer_data(cust001, 'sensitive_info').
+% Expected: true (data gets encrypted and transmitted)
+
+% 9. Can vendX sign a contract?
+% Query:
+% ?- can_sign_contract(vendX).
+% Expected: true (vetted and approved)
+%
+% Can vendY sign a contract?
+% ?- can_sign_contract(vendY).
+% Expected: false (not vetted or approved)
+
+% 10. Conducting inventory checks at the end of each month
+% Query:
+% ?- conduct_inventory_check(date(2024,11,30)).
+% Expected: true
+%
+% ?- conduct_inventory_check(date(2024,11,29)).
+% Expected: false (not end_of_month)
+
