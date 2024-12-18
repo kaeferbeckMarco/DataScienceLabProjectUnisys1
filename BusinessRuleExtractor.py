@@ -1,8 +1,5 @@
-from GPTModel import GPTModel
-from GeminiModel import GeminiModel
 from LLM import LLM
-from MistralModel import MistralModel
-from OllamaModel import OllamaModel
+from ModelFactory import ModelFactory
 import configparser
 
 
@@ -22,37 +19,18 @@ class BusinessRuleExtractor:
 
         self.prompt2 = config.get("Prompts", "prompt2")
 
+        self.model = ModelFactory(llm).create_model()
+
     def extract_business_rules_from_document(self, text):
-        # get the correct LLM model based on the LLM enum
-        model = self.get_model()
         # extract the business rules from the text
-        segments = model.segment_text(text, self.prompt1,self.systemPrompt1)
+        segments = self.model.segment_text(text, self.prompt1,self.systemPrompt1)
         extracted_rules = []
         for segment in segments:
-            extracted_rules.append(model.extract_rules_from_text(segment, self.prompt2,self.systemPrompt2))
+            extracted_rules.append(self.model.extract_rules_from_text(segment, self.prompt2,self.systemPrompt2))
 
         return extracted_rules
 
     def transalte_document_to_english(self, text):
-        # get the correct LLM model based on the LLM enum
-        model = self.get_model()
         # translate the document to english
-        return model.translate_document_to_english(text)
-
-    def get_model(self):
-
-        config = configparser.ConfigParser()
-        config.read("apiKey.properties")
-
-        if self.llm == LLM.OLLAMA:
-            return OllamaModel()
-        if self.llm == LLM.MISTRAL:
-            return MistralModel()
-        if self.llm == LLM.GPT:
-            return GPTModel(config.get("api_keys", "gpt"))
-        if self.llm == LLM.GEMINI:
-            return GeminiModel(config.get("api_keys", "gemini"))
-        # Add other models as needed
-        else:
-            raise ValueError("Unsupported LLM model")
+        return self.model.translate_document_to_english(text)
 
