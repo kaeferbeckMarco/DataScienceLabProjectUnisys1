@@ -4,43 +4,43 @@ class GeminiModel:
     def __init__(self, api_key):
         self.api_key = api_key
         genai.configure(api_key=self.api_key)
-        self.model = genai.GenerativeModel("gemini-1.5-flash")
+
 
     def segment_text(self, text, prompt1, system_prompt):
-        response = self.model.generate_content(
-            contents=[
-                {
-                    "parts": [
-                        {"text": system_prompt, "role": "system"},
-                        {"text": f"{prompt1}: {text}", "role": "user"}
-                    ]
-                }
-            ]
+        # Send the system prompt
+        model = genai.GenerativeModel(
+            model_name="gemini-1.5-flash",
+            system_instruction=system_prompt
         )
-        return response.candidates[0].content.parts[0].text.split("#")
+
+        user_message = f"{prompt1}: {text}"
+        response = model.generate_content(user_message)
+
+        return response.text.split("#")
 
     def extract_rules_from_text(self, segment, prompt2, system_prompt):
-        prompt = f"{prompt2}: {segment}"
-        response = self.model.generate_content(
-            contents=[
-                {
-                    "parts": [
-                        {"text": system_prompt, "role": "system"},
-                        {"text": prompt, "role": "user"}
-                    ]
-                }
-            ]
+        # Send the system prompt
+        model = genai.GenerativeModel(
+            model_name="gemini-1.5-flash",
+            system_instruction=system_prompt
         )
-        return response.candidates[0].content.parts[0].text
+
+        # Send the user message and receive the response
+        user_message = f"{prompt2}: {segment}"
+        response = model.generate_content(user_message)
+
+        # Process the response
+        return response.text
 
     def translate_document_to_english(self, text):
-        response = self.model.generate_content(
-            contents=[
-                {
-                    "parts": [
-                        {"text": f"Translate the following text to English: {text}", "role": "user"}
-                    ]
-                }
-            ]
+        # Send the system prompt
+        model = genai.GenerativeModel(
+            model_name="gemini-1.5-flash",
         )
-        return response.candidates[0].content.parts[0].text
+
+        # Send the translation request and receive the response
+        user_message = f"Translate the following text to English: {text}"
+        response = model.generate_content(user_message)
+
+        # Process the response
+        return response.text
