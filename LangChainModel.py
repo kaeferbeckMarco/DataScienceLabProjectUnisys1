@@ -53,7 +53,7 @@ class BusinessRulesProcessor:
         )
 
         result = chain.invoke({"text": text})
-        return result.content  # Extrahiere den String-Inhalt
+        return result.content
 
     def extract_prolog_rules(self, text):
         """Extract Prolog rules using system_prompt2 and prompt2"""
